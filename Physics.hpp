@@ -14,13 +14,13 @@ typedef enum Operator
     gt, // greater than
     ge, // greater than or equal
     lt, // less than
-    le, // less than or equal
+    le  // less than or equal
 } Operator;
 
 typedef struct Vec2
 {
-    double y;
-    double x;
+    double y{};
+    double x{};
 
     // calculate distance to point (0.0 ,0.0)
     double distance() // root(x^2 + y^2)
@@ -93,3 +93,47 @@ bool cmp_value(Vec2 vector1, Vec2 vector2, Operator opp, Orientation orientation
 {
     return cmp(vector1.value(orientation), vector2.value(orientation), opp);
 }
+
+// Superclass Shape
+class Shape
+{
+public:                                                            // Default constructor
+    Shape(Vec2 position, Vec2 velocity, double mass, double size); // Main constructor
+    Shape(Shape &other);                                           // Copy constructor
+    Shape(Shape &&source);                                         // Move constructor
+
+    // Getters
+    Vec2 getPos() const;
+    Vec2 getAccel() const;
+    double getMass() const;
+    double getSize() const;
+
+    virtual bool collides(Shape other) const = 0; // Collision virtual method
+
+private:
+    Vec2 m_position; // Holds current position of the shape
+    Vec2 m_velocity; // Holds current velocity of the shape
+    double m_mass{};
+    double m_size{};
+};
+
+Shape::Shape(Vec2 position, Vec2 velocity, double mass, double size) : m_position{position}, m_velocity{velocity}, m_mass{mass}, m_size{size} {};
+
+Shape::Shape(Shape &other) : m_position{other.m_position}, m_velocity{other.m_velocity}, m_mass{other.m_mass}, m_size{other.m_size} {};
+
+Shape::Shape(Shape &&source) : m_position{source.m_position}, m_velocity{source.m_velocity}, m_mass{source.m_mass}, m_size{source.m_size}
+{
+    Vec2 zero{0, 0};
+    source.m_position = zero;
+    source.m_velocity = zero;
+    source.m_mass = 0.0;
+    source.m_size = 0.0;
+};
+
+Vec2 Shape::getPos() const { return m_position; };
+
+Vec2 Shape::getAccel() const { return m_velocity; };
+
+double Shape::getMass() const { return m_mass; };
+
+double Shape::getSize() const { return m_size; };
