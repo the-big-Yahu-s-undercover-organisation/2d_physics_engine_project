@@ -81,21 +81,15 @@ bool cmp(T element1, T element2, Operator opp)
 
 bool cmp_distance(Vec2 vector1, Vec2 vector2, Operator opp)
 {
-    double d1 = vector1.distance();
-    double d2 = vector2.distance();
-    return cmp(d1, d2, opp);
+    return cmp(vector1.distance(), vector2.distance(), opp);
 }
 
 bool cmp_angle(Vec2 vector1, Vec2 vector2, Operator opp)
 {
-    double a1 = vector1.angle();
-    double a2 = vector2.angle();
-    return cmp(a1, a2, opp);
+    return cmp(vector1.angle(), vector2.angle(), opp);
 }
 
 bool cmp_value(Vec2 vector1, Vec2 vector2, Operator opp, Orientation orientation)
 {
-    double v1 = vector1.value(orientation);
-    double v2 = vector2.value(orientation);
-    return cmp(v1, v2, opp);
+    return cmp(vector1.value(orientation), vector2.value(orientation), opp);
 }
