@@ -54,6 +54,22 @@ typedef struct Vec2
     }
 } Vec2;
 
+typedef struct Dynamics
+{
+    // Data needed for dynamics
+    double m_mass{};
+
+    // Linear movement
+    Vec2 m_position{};
+    Vec2 m_velocity{};
+    Vec2 m_force{};
+
+    // Rotating
+    double m_inertia{};
+    double m_angvelocity{};
+    double m_torque{};
+} Dynamics;
+
 template <typename T>
 bool cmp(T element1, T element2, Operator opp)
 {
@@ -97,43 +113,44 @@ bool cmp_value(Vec2 vector1, Vec2 vector2, Operator opp, Orientation orientation
 // Superclass Shape
 class Shape
 {
-public:                                                            // Default constructor
-    Shape(Vec2 position, Vec2 velocity, double mass, double size); // Main constructor
-    Shape(Shape &other);                                           // Copy constructor
-    Shape(Shape &&source);                                         // Move constructor
+public:
+    Shape(Dynamics state, double size);        // Main constructor
+    Shape(Shape &other);                       // Copy constructor
+    Shape(Shape &&source);                     // Move constructor
+    Shape &operator=(const Shape &) = default; // Copy assignment
+    Shape &operator=(Shape &&) = default;      // Move assignment
 
     // Getters
     Vec2 getPos() const;
-    Vec2 getAccel() const;
+    Vec2 getVelo() const;
     double getMass() const;
     double getSize() const;
 
-    virtual bool collides(Shape other) const = 0; // Collision virtual method
+    virtual bool collides(const Shape &other) const = 0; // Collision virtual method
+    virtual double area() const = 0;                     // Calculates the area of the shape
 
 private:
-    Vec2 m_position; // Holds current position of the shape
-    Vec2 m_velocity; // Holds current velocity of the shape
-    double m_mass{};
+    Dynamics m_state; // Struct that contains data useful for movement
     double m_size{};
 };
 
-Shape::Shape(Vec2 position, Vec2 velocity, double mass, double size) : m_position{position}, m_velocity{velocity}, m_mass{mass}, m_size{size} {};
+Shape::Shape(Dynamics state, double size) : m_state{state}, m_size{size} {};
 
-Shape::Shape(Shape &other) : m_position{other.m_position}, m_velocity{other.m_velocity}, m_mass{other.m_mass}, m_size{other.m_size} {};
+Shape::Shape(Shape &other) : m_state{other.m_state}, m_size{other.m_size} {};
 
-Shape::Shape(Shape &&source) : m_position{source.m_position}, m_velocity{source.m_velocity}, m_mass{source.m_mass}, m_size{source.m_size}
+Shape::Shape(Shape &&source) : m_state{source.m_state}, m_size{source.m_size}
 {
     Vec2 zero{0, 0};
-    source.m_position = zero;
-    source.m_velocity = zero;
-    source.m_mass = 0.0;
+    source.m_state.m_position = zero;
+    source.m_state.m_velocity = zero;
+    source.m_state.m_mass = 0.0;
     source.m_size = 0.0;
 };
 
-Vec2 Shape::getPos() const { return m_position; };
+Vec2 Shape::getPos() const { return m_state.m_position; };
 
-Vec2 Shape::getAccel() const { return m_velocity; };
+Vec2 Shape::getVelo() const { return m_state.m_velocity; };
 
-double Shape::getMass() const { return m_mass; };
+double Shape::getMass() const { return m_state.m_mass; };
 
 double Shape::getSize() const { return m_size; };
