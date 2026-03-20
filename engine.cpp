@@ -54,80 +54,48 @@ typedef struct Vec2
     }
 } Vec2;
 
+template <typename T>
+bool cmp(T element1, T element2, Operator opp)
+{
+    switch (opp)
+    {
+    case Operator::eq:
+        return element1 == element2;
+
+    case Operator::ne:
+        return element1 != element2;
+
+    case Operator::gt:
+        return element1 > element2;
+
+    case Operator::ge:
+        return element1 >= element2;
+
+    case Operator::lt:
+        return element1 < element2;
+
+    case Operator::le:
+        return element1 <= element2;
+    }
+}
+
 bool cmp_distance(Vec2 vector1, Vec2 vector2, Operator opp)
 {
     double d1 = vector1.distance();
     double d2 = vector2.distance();
-    switch (opp)
-    {
-    case Operator::eq:
-        return d1 == d2;
-
-    case Operator::ne:
-        return d1 != d2;
-
-    case Operator::gt:
-        return d1 > d2;
-
-    case Operator::ge:
-        return d1 >= d2;
-
-    case Operator::lt:
-        return d1 < d2;
-
-    case Operator::le:
-        return d1 <= d2;
-    }
+    return cmp(d1, d2, opp);
 }
 
 bool cmp_angle(Vec2 vector1, Vec2 vector2, Operator opp)
 {
     double a1 = vector1.angle();
     double a2 = vector2.angle();
-    switch (opp)
-    {
-    case Operator::eq:
-        return a1 == a2;
-
-    case Operator::ne:
-        return a1 != a2;
-
-    case Operator::gt:
-        return a1 > a2;
-
-    case Operator::ge:
-        return a1 >= a2;
-
-    case Operator::lt:
-        return a1 < a2;
-
-    case Operator::le:
-        return a1 <= a2;
-    }
+    return cmp(a1, a2, opp);
 }
 
 bool cmp_value(Vec2 vector1, Vec2 vector2, Operator opp, Orientation orientation)
 {
     double v1 = vector1.value(orientation);
     double v2 = vector2.value(orientation);
-    switch (opp)
-    {
-    case Operator::eq:
-        return v1 == v2;
-
-    case Operator::ne:
-        return v1 != v2;
-
-    case Operator::gt:
-        return v1 > v2;
-
-    case Operator::ge:
-        return v1 >= v2;
-
-    case Operator::lt:
-        return v1 < v2;
-
-    case Operator::le:
-        return v1 <= v2;
-    }
+    return cmp(v1, v2, opp);
 }
