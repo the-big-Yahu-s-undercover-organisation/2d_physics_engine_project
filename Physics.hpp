@@ -52,6 +52,30 @@ typedef struct Vec2
         }
         return angle;
     }
+
+    // Operator overloading
+    Vec2 operator+(const Vec2 &v) const { return {x + v.x, y + v.y}; };
+    Vec2 operator-(const Vec2 &v) const { return {x - v.x, y - v.y}; };
+    Vec2 operator*(double s) const { return {x * s, y * s}; };
+    Vec2 operator/(double s) const { return {x / s, y / s}; };
+    Vec2 &operator+=(const Vec2 &v)
+    {
+        x += v.x;
+        y += v.y;
+        return *this;
+    };
+    Vec2 &operator-=(const Vec2 &v)
+    {
+        x -= v.x;
+        y -= v.y;
+        return *this;
+    };
+    Vec2 &operator*=(double s)
+    {
+        x *= s;
+        y *= s;
+        return *this;
+    };
 } Vec2;
 
 typedef struct Dynamics
@@ -76,6 +100,10 @@ bool cmp(T element1, T element2, Operator opp)
     switch (opp)
     {
     case Operator::eq:
+        if ((double)element1 && (double)element2)
+        {
+            return std::abs(element1 - element2) < 0.000001;
+        }
         return element1 == element2;
 
     case Operator::ne:
