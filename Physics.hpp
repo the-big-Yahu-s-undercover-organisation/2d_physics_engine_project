@@ -142,7 +142,8 @@ bool cmp_value(Vec2 vector1, Vec2 vector2, Operator opp, Orientation orientation
 class Shape
 {
 public:
-    Shape(Dynamics state, double size);        // Main constructor
+    Shape(Dynamics state, double size); // Main constructor
+    virtual ~Shape() = default;
     Shape(Shape &other);                       // Copy constructor
     Shape(Shape &&source);                     // Move constructor
     Shape &operator=(const Shape &) = default; // Copy assignment
