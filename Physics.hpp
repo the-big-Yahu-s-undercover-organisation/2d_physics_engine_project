@@ -28,6 +28,12 @@ typedef struct Vec2
         return std::sqrt((std::pow(x, 2) + std::pow(y, 2)));
     }
 
+    // Calculate distance to other vector
+    double distance(const Vec2 other)
+    {
+        return std::sqrt(std::pow(other.x - x, 2) + std::pow(other.y - y, 2));
+    }
+
     // return value of x or y based on the orientation that we want
     double value(Orientation orientation)
     {
@@ -203,3 +209,37 @@ Vec2 Shape::getVelo() const { return m_state.m_velocity; };
 double Shape::getMass() const { return m_state.m_mass; };
 
 double Shape::getSize() const { return m_size; };
+
+// Circle Class
+
+class Circle : public Shape
+{
+public:
+    Circle(Dynamics state, double size);
+    ~Circle();
+    Circle(const Circle &other) = default;
+    Circle(Circle &&source) = default;
+    Circle &operator=(const Circle &other) = default;
+    Circle &operator=(Circle &&source) = default;
+
+    bool collides(const Circle &other) const;
+    double area() const;
+
+private:
+};
+
+Circle::Circle(Dynamics state, double size) : Shape(state, size) {};
+
+bool Circle::collides(const Circle &other) const
+{
+    if ((this->getPos().distance(other.getPos())) <= this->getSize() + other.getSize())
+    {
+        return false;
+    }
+    return true;
+}
+
+double Circle::area() const
+{
+    return std::acos(-1) * getSize() * getSize();
+}
