@@ -182,3 +182,11 @@ Vec2 Shape::getVelo() const { return m_state.m_velocity; };
 double Shape::getMass() const { return m_state.m_mass; };
 
 double Shape::getSize() const { return m_size; };
+
+// Circle Class
+
+class Circle
+{
+public:
+private:
+};
