@@ -107,18 +107,38 @@ bool cmp(T element1, T element2, Operator opp)
         return element1 == element2;
 
     case Operator::ne:
+        if ((double)element1 && (double)element2)
+        {
+            return std::abs(element1 - element2) > 0.000001;
+        }
         return element1 != element2;
 
     case Operator::gt:
+        if ((double)element1 && (double)element2)
+        {
+            return element1 - element2 > 0.000001;
+        }
         return element1 > element2;
 
     case Operator::ge:
+        if ((double)element1 && (double)element2)
+        {
+            return element1 - element2 > 0.000001 || std::abs(element1 - element2) < 0.000001;
+        }
         return element1 >= element2;
 
     case Operator::lt:
+        if ((double)element1 && (double)element2)
+        {
+            return element2 - element1 > 0.000001;
+        }
         return element1 < element2;
 
     case Operator::le:
+        if ((double)element1 && (double)element2)
+        {
+            return element2 - element1 > 0.000001 || std::abs(element1 - element2) < 0.000001;
+        }
         return element1 <= element2;
     }
 }
