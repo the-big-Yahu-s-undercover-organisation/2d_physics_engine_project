@@ -188,129 +188,123 @@ class Shape
 {
 public:
     // declarations
-    Shape(Dynamics state, double size); // Main constructor
-    virtual ~Shape() = default;
-    Shape(Shape &other);                       // Copy constructor
-    Shape(Shape &&source);                     // Move constructor
-    Shape &operator=(const Shape &) = default; // Copy assignment
-    Shape &operator=(Shape &&) = default;      // Move assignment
+    Shape(Dynamics state) : m_state{state} {};       // Main constructor for all shapes
+    virtual ~Shape() = default;                      // destructor
+    Shape(Shape &other) : m_state{other.m_state} {}; // copy constructor
+    Shape(Shape &&source) : m_state{source.m_state}  // move constructor
+    {
+        Vec2 zero{0, 0};
+        source.m_state.m_position = zero;
+        source.m_state.m_velocity = zero;
+        source.m_state.m_mass = 0.0;
+    }
+    Shape &operator=(const Shape &) = default; // copy assignment
+    Shape &operator=(Shape &&) = default;      // move assignment
 
     // Getters
-    Vec2 getPos() const;
-    Vec2 getVelo() const;
-    double getMass() const;
-    double getSize() const;
+    Vec2 getPos() const { return m_state.m_position; }
+    Vec2 getVelo() const { return m_state.m_velocity; }
+    double getMass() const { return m_state.m_mass; }
 
     virtual bool collides(const Shape &other) const = 0; // Collision virtual method
-    virtual double area() const = 0;                     // Calculates the area of the shape
+    virtual double getArea() const = 0;                  // Calculates the area of the shape
 
 private:
-    Dynamics m_state; // Struct that contains data useful for movement
-    double m_size{};
+    Dynamics m_state; // Struct that contains data useful for the shapes' movement
 };
-
-Shape::Shape(Dynamics state, double size) : m_state{state}, m_size{size} {};
-
-Shape::Shape(Shape &other) : m_state{other.m_state}, m_size{other.m_size} {};
-
-Shape::Shape(Shape &&source) : m_state{source.m_state}, m_size{source.m_size}
-{
-    Vec2 zero{0, 0};
-    source.m_state.m_position = zero;
-    source.m_state.m_velocity = zero;
-    source.m_state.m_mass = 0.0;
-    source.m_size = 0.0;
-};
-
-Vec2 Shape::getPos() const { return m_state.m_position; };
-
-Vec2 Shape::getVelo() const { return m_state.m_velocity; };
-
-double Shape::getMass() const { return m_state.m_mass; };
-
-double Shape::getSize() const { return m_size; };
 
 // Circle Class
 class Circle : public Shape
 {
 public:
     // declarations
-    Circle(Dynamics state, double size); // Main constructor
-    ~Circle();
-    Circle(const Circle &other) = default;            // copy constructor
+    Circle(Dynamics state) : Shape(state) {};         // constructor
+    ~Circle();                                        // destructor
+    Circle(Circle &other) = default;                  // copy constructor
     Circle(Circle &&source) = default;                // move constructor
     Circle &operator=(const Circle &other) = default; // copy assignment
     Circle &operator=(Circle &&source) = default;     // move assignement
 
-    bool collides(const Circle &other) const;
-    double area() const;
+    // Shape-specific functions
+    double getSize() { return size; };
+    bool collides(Circle &other)
+    {
+        if ((this->getPos().distance(other.getPos())) <= size + other.size)
+        {
+            return false;
+        }
+        return true;
+    }
+    double getArea() const { return std::acos(-1) * size * size; } // area = pi * radius * radius
 
 private:
-    // this class doesn't need any characteristic data because the needed data already sits inside the Shape class
+    double size{};
 };
-
-Circle::Circle(Dynamics state, double size) : Shape(state, size) {};
-
-bool Circle::collides(const Circle &other) const
-{
-    if ((this->getPos().distance(other.getPos())) <= this->getSize() + other.getSize())
-    {
-        return false;
-    }
-    return true;
-}
-
-double Circle::area() const
-{
-    return std::acos(-1) * getSize() * getSize(); // area = pi * radius * radius
-}
 
 // Square class
 class Square : public Shape
 {
     // declarations
-    Square(Dynamics state, double size); // Main constructor
-    ~Square();
-    Square(Square &other) = default;             // Copy constructor
-    Square(Square &&source) = default;           // Move constructor
-    Square &operator=(const Square &) = default; // Copy assignment
-    Square &operator=(Square &&) = default;      // Move assignment
+    Square(Dynamics state) : Shape(state) {};    // constructor
+    ~Square();                                   // destructor
+    Square(Shape &other);                        // copy constructor
+    Square(Shape &&source);                      // move constructor
+    Square &operator=(const Square &) = default; // copy assignment
+    Square &operator=(Square &&) = default;      // move assignment
 
-    bool collides(const Square &other) const;
-    double area() const;
+    // Shape-specific functions
+    double getSize() { return size; }
+    bool collides(Square &other) {
+        // we still have to implement this function
+    };
+    double getArea() { return std::pow(size * 2, 2); } // area = edge^2 = (size*2)^2
 
 private:
-    // this class doesn't need any characteristic data because the needed data already sits inside the Shape class
+    double size{};
 };
-
-Square::Square(Dynamics state, double size) : Shape(state, size) {};
-
-double Square::area() const
-{
-    return std::pow(getSize() * 2, 2); // area = edge^2 = (size*2)^2
-}
 
 // Triangle class
 class Triangle : public Shape
 {
     // declarations
-    Triangle(Dynamics state, double size); // Main constructor
-    ~Triangle();
-    Triangle(Triangle &other) = default;             // Copy constructor
-    Triangle(Triangle &&source) = default;           // Move constructor
-    Triangle &operator=(const Triangle &) = default; // Copy assignment
-    Triangle &operator=(Triangle &&) = default;      // Move assignment
+    Triangle(Dynamics state, double size) : Shape(state) {}; // constructor
+    ~Triangle();                                             // destructor
+    Triangle(Shape &other);                                  // copy constructor
+    Triangle(Shape &&source);                                // move constructor
+    Triangle &operator=(const Triangle &) = default;         // copy assignment
+    Triangle &operator=(Triangle &&) = default;              // move assignment
 
-    bool collides(const Triangle &other) const;
-    double area() const;
+    // Shape-specific functions
+    double getSize() { return size; }
+    bool collides(const Triangle &other) const
+    {
+        // we still have to implement this function
+    }
+    double area() const { return std::pow(size * 2, 2) / 2; } // area = edge^2 = ((size*2)^2)/2
 
 private:
-    // this class doesn't need any characteristic data because the needed data already sits inside the Shape class
+    double size{};
 };
 
-Triangle::Triangle(Dynamics state, double size) : Shape(state, size) {};
-
-double Triangle::area() const
+// Rectangle class
+class Rectangle : public Shape
 {
-    return std::pow(getSize() * 2, 2) / 2; // area = edge^2 = ((size*2)^2)/2
-}
+    // declarations
+    Rectangle(Dynamics state, Vec2 dimensions) : Shape(state) {}; // constructor
+    ~Rectangle();                                                 // destructor
+    Rectangle(Shape &other);                                      // copy constructor
+    Rectangle(Shape &&source);                                    // move constructor
+    Rectangle &operator=(const Rectangle &) = default;            // copy assignment
+    Rectangle &operator=(Rectangle &&) = default;                 // move assignment
+
+    // Shape-specific functions
+    Vec2 getDimensions() { return dimensions; }
+    bool collides(const Rectangle &other) const
+    {
+        // we still have to implement this
+    }
+    double area() const { return dimensions.y * dimensions.x; } // area = base * height
+
+private:
+    Vec2 dimensions{};
+};
