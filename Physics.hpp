@@ -1,13 +1,13 @@
 // main source-code file
 #include <cmath>
 
-typedef enum Orientation
+enum Orientation
 {
     horizontal,
     vectical
-} Orientation;
+};
 
-typedef enum Operator
+enum Operator
 {
     eq, // equal
     ne, // not equal
@@ -15,9 +15,9 @@ typedef enum Operator
     ge, // greater than or equal
     lt, // less than
     le  // less than or equal
-} Operator;
+};
 
-typedef struct Vec2
+struct Vec2
 {
     double y{};
     double x{};
@@ -82,9 +82,9 @@ typedef struct Vec2
         y *= s;
         return *this;
     };
-} Vec2;
+};
 
-typedef struct Dynamics
+struct Dynamics
 {
     // Data needed for dynamics
     double m_mass{};
@@ -98,7 +98,7 @@ typedef struct Dynamics
     double m_inertia{};
     double m_angvelocity{};
     double m_torque{};
-} Dynamics;
+};
 
 template <typename T>
 bool cmp(T element1, T element2, Operator opp)
@@ -129,7 +129,7 @@ bool cmp(T element1, T element2, Operator opp)
     case Operator::ge:
         if ((double)element1 && (double)element2)
         {
-            return element1 - element2 > 0.000001 || std::abs(element1 - element2) < 0.000001;
+            return element1 - element2 > 0.000000;
         }
         return element1 >= element2;
 
@@ -143,7 +143,7 @@ bool cmp(T element1, T element2, Operator opp)
     case Operator::le:
         if ((double)element1 && (double)element2)
         {
-            return element2 - element1 > 0.000001 || std::abs(element1 - element2) < 0.000001;
+            return element2 - element1 > 0.000000;
         }
         return element1 <= element2;
     }
