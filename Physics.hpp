@@ -309,11 +309,3 @@ class Rectangle : public Shape
     Vec2 dimensions{};
 };
 
-Rectangle::Rectangle(Dynamics state, Vec2 dimensions) : Shape(state) {};
-
-//world class (runs the simulation & constains the environment)
-class World
-{
-    //declarations
-    World(); //main constructor
-};
