@@ -111,6 +111,7 @@ struct Dynamics
     Vec2 m_force{};
 
     // Rotating
+    double m_current_angle{};
     double m_inertia{};
     double m_angvelocity{};
     double m_torque{};
@@ -288,15 +289,14 @@ double Square::area() const
     return std::pow(getSize()*2, 2); //area = edge^2 = (size*2)^2
 }
 
-
 //Triangle class
 class Triangle : public Shape 
 {
     //declarations
     Triangle(Dynamics state, double size); // Main constructor
     ~Triangle();
-    Triangle(Shape &other);                        // Copy constructor
-    Triangle(Shape &&source);                      // Move constructor
+    Triangle(Shape &other);                          // Copy constructor
+    Triangle(Shape &&source);                        // Move constructor
     Triangle &operator=(const Triangle &) = default; // Copy assignment
     Triangle &operator=(Triangle &&) = default;      // Move assignment
 
