@@ -22,13 +22,13 @@ struct Vec2
     double y{};
     double x{};
 
-    // calculate distance to point (0.0 ,0.0)
-    double distance() // root(x^2 + y^2)
+    // calculate distance to point source (0.0 ,0.0)
+    double distance_from_source() // root(x^2 + y^2)
     {
         return std::sqrt((std::pow(x, 2) + std::pow(y, 2)));
     }
 
-    // Calculate distance to other vector
+    // Calculate distance to another Vec2's position
     double distance(const Vec2 other)
     {
         return std::sqrt(std::pow(other.x - x, 2) + std::pow(other.y - y, 2));
@@ -81,8 +81,14 @@ struct Vec2
         x *= s;
         y *= s;
         return *this;
-    };
+    };  
 };
+
+//function to measure directional similarity between two vectors
+double dot_product(const Vec2 &v1, const Vec2 &v2)
+{
+    return v1.x * v2.x + v1.y * v2.y; //x1*x2 + y1*y2
+}
 
 struct Dynamics
 {
@@ -92,6 +98,7 @@ struct Dynamics
     // Linear movement
     Vec2 m_position{};
     Vec2 m_velocity{};
+    Vec2 m_acceleration{};
     Vec2 m_force{};
 
     // Rotating
@@ -151,7 +158,7 @@ bool cmp(T element1, T element2, Operator opp)
 
 bool cmp_distance(Vec2 vector1, Vec2 vector2, Operator opp)
 {
-    return cmp(vector1.distance(), vector2.distance(), opp);
+    return cmp(vector1.distance_from_source(), vector2.distance_from_source(), opp);
 }
 
 bool cmp_angle(Vec2 vector1, Vec2 vector2, Operator opp)
@@ -168,6 +175,7 @@ bool cmp_value(Vec2 vector1, Vec2 vector2, Operator opp, Orientation orientation
 class Shape
 {
 public:
+    //declarations
     Shape(Dynamics state, double size); // Main constructor
     virtual ~Shape() = default;
     Shape(Shape &other);                       // Copy constructor
@@ -175,7 +183,7 @@ public:
     Shape &operator=(const Shape &) = default; // Copy assignment
     Shape &operator=(Shape &&) = default;      // Move assignment
 
-    // Getters
+    // Getters 
     Vec2 getPos() const;
     Vec2 getVelo() const;
     double getMass() const;
@@ -211,24 +219,25 @@ double Shape::getMass() const { return m_state.m_mass; };
 double Shape::getSize() const { return m_size; };
 
 // Circle Class
-
 class Circle : public Shape
 {
 public:
-    Circle(Dynamics state, double size);
+    //declarations
+    Circle(Dynamics state, double size); // Main constructor
     ~Circle();
-    Circle(const Circle &other) = default;
-    Circle(Circle &&source) = default;
-    Circle &operator=(const Circle &other) = default;
-    Circle &operator=(Circle &&source) = default;
+    Circle(const Circle &other) = default;            //copy constructor
+    Circle(Circle &&source) = default;                //move constructor
+    Circle &operator=(const Circle &other) = default; //copy assignment
+    Circle &operator=(Circle &&source) = default;     //move assignement
 
     bool collides(const Circle &other) const;
     double area() const;
 
 private:
+    //this class doesn't need any characteristic data because the needed data already sits inside the Shape class
 };
 
-Circle::Circle(Dynamics state, double size) : Shape(state, size) {};
+Circle::Circle(Dynamics state, double size) : Shape(state, size) {}; 
 
 bool Circle::collides(const Circle &other) const
 {
@@ -241,5 +250,6 @@ bool Circle::collides(const Circle &other) const
 
 double Circle::area() const
 {
-    return std::acos(-1) * getSize() * getSize();
+    return std::acos(-1) * getSize() * getSize(); //pi * radius * radius
 }
+
