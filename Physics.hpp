@@ -274,7 +274,7 @@ class Square : public Shape
     Square &operator=(const Square &) = default; // Copy assignment
     Square &operator=(Square &&) = default;      // Move assignment
 
-    bool collides(const Circle &other) const;
+    bool collides(const Square &other) const;
     double area() const;
 
     private:
@@ -286,4 +286,30 @@ Square::Square(Dynamics state, double size) : Shape(state,size) {};
 double Square::area() const
 {
     return std::pow(getSize()*2, 2); //area = edge^2 = (size*2)^2
+}
+
+
+//Triangle class
+class Triangle : public Shape 
+{
+    //declarations
+    Triangle(Dynamics state, double size); // Main constructor
+    ~Triangle();
+    Triangle(Shape &other);                        // Copy constructor
+    Triangle(Shape &&source);                      // Move constructor
+    Triangle &operator=(const Triangle &) = default; // Copy assignment
+    Triangle &operator=(Triangle &&) = default;      // Move assignment
+
+    bool collides(const Triangle &other) const;
+    double area() const;
+
+    private:
+    //this class doesn't need any characteristic data because the needed data already sits inside the Shape class
+};
+
+Triangle::Triangle(Dynamics state, double size) : Shape(state,size) {};
+
+double Triangle::area() const
+{
+    return std::pow(getSize()*2, 2)/2; //area = edge^2 = ((size*2)^2)/2
 }
