@@ -17,6 +17,12 @@ enum Operator
     le  // less than or equal
 };
 
+//function to measure directional similarity between two vectors
+double dot_product(const Vec2 &v1, const Vec2 &v2)
+{
+    return v1.x * v2.x + v1.y * v2.y; //x1*x2 + y1*y2
+}
+
 struct Vec2
 {
     double y{};
@@ -25,13 +31,22 @@ struct Vec2
     // calculate distance to point source (0.0 ,0.0)
     double distance_from_source() // root(x^2 + y^2)
     {
-        return std::sqrt((std::pow(x, 2) + std::pow(y, 2)));
+        return std::sqrt(dot_product(this, Vec2{0, 0}));
     }
 
-    // Calculate distance to another Vec2's position
+    // Calculate distance between two Vec2 (positions) 
     double distance(const Vec2 other)
     {
-        return std::sqrt(std::pow(other.x - x, 2) + std::pow(other.y - y, 2));
+        return std::sqrt(dot_product(this, other)); 
+    }
+
+    // returns a vector with the same direction as the original, but with length 1.
+    Vec2 normalize(const Vec2 &v)
+    {
+        double length = distance_from_source();
+        if(length == 0.0) //division by 0
+        {return Vec2{0,0};} 
+        return v / length;
     }
 
     // return value of x or y based on the orientation that we want
@@ -83,12 +98,6 @@ struct Vec2
         return *this;
     };  
 };
-
-//function to measure directional similarity between two vectors
-double dot_product(const Vec2 &v1, const Vec2 &v2)
-{
-    return v1.x * v2.x + v1.y * v2.y; //x1*x2 + y1*y2
-}
 
 struct Dynamics
 {
@@ -250,6 +259,31 @@ bool Circle::collides(const Circle &other) const
 
 double Circle::area() const
 {
-    return std::acos(-1) * getSize() * getSize(); //pi * radius * radius
+    return std::acos(-1) * getSize() * getSize(); //area = pi * radius * radius
 }
 
+
+//Square class
+class Square : public Shape 
+{
+    //declarations
+    Square(Dynamics state, double size); // Main constructor
+    ~Square();
+    Square(Shape &other);                        // Copy constructor
+    Square(Shape &&source);                      // Move constructor
+    Square &operator=(const Square &) = default; // Copy assignment
+    Square &operator=(Square &&) = default;      // Move assignment
+
+    bool collides(const Circle &other) const;
+    double area() const;
+
+    private:
+    //this class doesn't need any characteristic data because the needed data already sits inside the Shape class
+};
+
+Square::Square(Dynamics state, double size) : Shape(state,size) {};
+
+double Square::area() const
+{
+    return std::pow(getSize()*2, 2); //area = edge^2 = (size*2)^2
+}
