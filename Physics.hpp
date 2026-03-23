@@ -117,6 +117,11 @@ struct Dynamics
     double m_inertia{};
     double m_angvelocity{};
     double m_torque{};
+
+    double get_m_current_angle()
+    {
+        return m_position.angle(); // gives the angle in radians of the direction
+    }
 };
 
 template <typename T>
@@ -207,7 +212,6 @@ public:
     double getMass() const { return m_state.m_mass; }
 
     virtual bool collides(const Shape &other) const = 0; // Collision virtual method
-    virtual double getArea() const = 0;                  // Calculates the area of the shape
 
 private:
     Dynamics m_state; // Struct that contains data useful for the shapes' movement
@@ -280,7 +284,7 @@ class Triangle : public Shape
     {
         // we still have to implement this function
     }
-    double area() const { return std::pow(size * 2, 2) / 2; } // area = edge^2 = ((size*2)^2)/2
+    double getArea() const { return std::pow(size * 2, 2) / 2; } // area = edge^2 = ((size*2)^2)/2
 
 private:
     double size{};
@@ -303,7 +307,7 @@ class Rectangle : public Shape
     {
         // we still have to implement this
     }
-    double area() const { return dimensions.y * dimensions.x; } // area = base * height
+    double getArea() const { return dimensions.y * dimensions.x; } // area = base * height
 
 private:
     Vec2 dimensions{};
