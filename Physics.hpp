@@ -60,10 +60,10 @@ struct Vec2
     }
 
     // Operator overloading
-    Vec2 operator+(const Vec2 &v) const { return {x + v.x, y + v.y}; };
-    Vec2 operator-(const Vec2 &v) const { return {x - v.x, y - v.y}; };
-    Vec2 operator*(double s) const { return {x * s, y * s}; };
-    Vec2 operator/(double s) const { return {x / s, y / s}; };
+    Vec2 operator+(const Vec2 &v) const { return {y + v.y, x + v.x}; };
+    Vec2 operator-(const Vec2 &v) const { return {y - v.y, x - v.x}; };
+    Vec2 operator*(double s) const { return {y * s, x * s}; };
+    Vec2 operator/(double s) const { return {y / s, x / s}; };
     Vec2 &operator+=(const Vec2 &v)
     {
         x += v.x;
