@@ -232,29 +232,17 @@ private:
 //function to use between shape-objects
 bool collides(const Shape &shape_A, const Shape &shape_B) // Collision checker for all shapes
 {
-    //first we have to take the position of each shape
-    Vec2 pos_A = shape_A.getPos();
-    Vec2 pos_B = shape_B.getPos();
-    //the we have to get the vector between the positions of the shapes
-    Vec2 AB = pos_B - pos_A;
-    //then we take the length of that vector using the distance method
-    double length_AB = AB.distance_from_source(); //we dont have to take BA because it is the same
-    //then we take the direction's (angle) of the vector between the 2 positions for each shape
-    double angle_AB = AB.angle();
+    Vec2 AB = shape_B.getPos() - shape_A.getPos();
+    double AB_len = AB.distance_from_source();
+    if(AB_len == 0.0) {return true;}
+    double AB_angle = AB.angle();
     double PI = std::acos(-1);
-    double angle_BA;
-    if(angle_AB <= PI) {angle_BA = angle_AB + PI;}
-    else{angle_BA = angle_AB - PI;}
-    
-    //now we get the real needed angle by also taking the offset of the current Shape's angle position
-    //now using that angle we are going to determine the length from the middle of our shape (position)
-    //to its side
-    double len_A = shape_A.get_distance_MiddleToSide(normalize_angle(angle_AB - shape_A.getAngle()));
-    double len_B = shape_B.get_distance_MiddleToSide(normalize_angle(angle_BA - shape_B.getAngle()));
-    //now we take the sum of the 2 length's of each shapes distance from middle to side
-    double len_total = len_A + len_B;
-    //now we compare that length with the length of the vector between the 2 shapes
-    if(len_total < length_AB) {return false;} //if lt -> no collision, if ge -> collision
+    double BA_angle;
+    if(AB_angle <= PI) {BA_angle = AB_angle + PI;}
+    else{BA_angle = AB_angle - PI;}
+    double len_A = shape_A.get_distance_MiddleToSide(normalize_angle(AB_angle - shape_A.getAngle()));
+    double len_B = shape_B.get_distance_MiddleToSide(normalize_angle(BA_angle - shape_B.getAngle()));
+    if(len_A + len_B < AB_len) {return false;} 
     return true;
 }
 
@@ -317,7 +305,10 @@ public:
     // Shape-specific functions
     Figure getFigure() { return Figure::Triangle; }
     double getSize() { return size; }
-    double get_distance_MiddleToSide(double angle) const override { return size / std::max(std::sin(angle), std::cos(angle));}
+    double get_distance_MiddleToSide(double angle) const override 
+    { 
+        //we still have to implement this
+    }
     double getArea() const { return std::pow(size * 2, 2) / 2; } // area = edge^2 = ((size*2)^2)/2
 
 private:
