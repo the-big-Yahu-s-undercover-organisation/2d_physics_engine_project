@@ -81,6 +81,14 @@ double dot_product(const Vec2 &v1, const Vec2 &v2)
     return v1.x * v2.x + v1.y * v2.y; // x1*x2 + y1*y2
 }
 
+double normalize_angle(double angle)
+{
+    double TWO_PI = 2.0 * std::acos(-1.0);
+    while (angle < 0) angle += TWO_PI;
+    while (angle >= TWO_PI) angle -= TWO_PI;
+    return angle;
+}
+
 struct Vec2
 {
     double y{};
@@ -229,17 +237,20 @@ bool collides(const Shape &shape_A, const Shape &shape_B) // Collision checker f
     Vec2 pos_B = shape_B.getPos();
     //the we have to get the vector between the positions of the shapes
     Vec2 AB = pos_B - pos_A;
-    Vec2 BA = pos_A - pos_B;
     //then we take the length of that vector using the distance method
     double length_AB = AB.distance_from_source(); //we dont have to take BA because it is the same
     //then we take the direction's (angle) of the vector between the 2 positions for each shape
     double angle_AB = AB.angle();
-    double angle_BA = BA.angle();
+    double PI = std::acos(-1);
+    double angle_BA;
+    if(angle_AB <= PI) {angle_BA = angle_AB + PI;}
+    else{angle_BA = angle_AB - PI;}
+    
     //now we get the real needed angle by also taking the offset of the current Shape's angle position
     //now using that angle we are going to determine the length from the middle of our shape (position)
     //to its side
-    double len_A = shape_A.get_distance_MiddleToSide(angle_AB - shape_A.getAngle());
-    double len_B = shape_B.get_distance_MiddleToSide(angle_BA - shape_B.getAngle());
+    double len_A = shape_A.get_distance_MiddleToSide(normalize_angle(angle_AB - shape_A.getAngle()));
+    double len_B = shape_B.get_distance_MiddleToSide(normalize_angle(angle_BA - shape_B.getAngle()));
     //now we take the sum of the 2 length's of each shapes distance from middle to side
     double len_total = len_A + len_B;
     //now we compare that length with the length of the vector between the 2 shapes
@@ -284,7 +295,7 @@ public:
     // Shape-specific functions
     Figure getFigure() { return Figure::Square; }
     double getSize() { return size; }
-    double get_distance_MiddleToSide(double angle) const override {return size / std::max(std::sin(angle),std::cos(angle));}
+    double get_distance_MiddleToSide(double angle) const override {return size / std::max(std::abs(std::sin(angle)),std::abs(std::cos(angle)));}
     double getArea() { return std::pow(size * 2, 2); } // area = edge^2 = (size*2)^2
 
 private:
