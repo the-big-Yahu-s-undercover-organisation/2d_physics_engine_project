@@ -17,6 +17,64 @@ enum Operator
     le  // less than or equal
 };
 
+enum Figure
+{
+    None,
+    Circle,
+    Square,
+    Triangle,
+    Rectangle,
+};
+
+template <typename T>
+bool cmp(T element1, T element2, Operator opp)
+{
+    switch (opp)
+    {
+    case Operator::eq:
+        if ((double)element1 && (double)element2)
+        {
+            return std::abs(element1 - element2) =< 0.000001;
+        }
+        return element1 == element2;
+
+    case Operator::ne:
+        if ((double)element1 && (double)element2)
+        {
+            return std::abs(element1 - element2) > 0.000001;
+        }
+        return element1 != element2;
+
+    case Operator::gt:
+        if ((double)element1 && (double)element2)
+        {
+            return element1 - element2 > 0.000001;
+        }
+        return element1 > element2;
+
+    case Operator::ge:
+        if ((double)element1 && (double)element2)
+        {
+            return element1 - element2 >= -0.000001;
+        }
+        return element1 >= element2;
+
+    case Operator::lt:
+        if ((double)element1 && (double)element2)
+        {
+            return element2 - element1 > 0.000001;
+        }
+        return element1 < element2;
+
+    case Operator::le:
+        if ((double)element1 && (double)element2)
+        {
+            return element2 - element1 >= -0.000001;
+        }
+        return element1 <= element2;
+    }
+}
+
 // function to measure directional similarity between two vectors
 double dot_product(const Vec2 &v1, const Vec2 &v2)
 {
@@ -31,24 +89,24 @@ struct Vec2
     // calculate distance to point source (0.0 ,0.0)
     double distance_from_source() // root(x^2 + y^2)
     {
-        return std::sqrt(dot_product(this, Vec2{0, 0}));
+        return std::sqrt(x*x + y*y);
     }
 
     // Calculate distance between two Vec2 (positions)
     double distance(const Vec2 other)
     {
-        return std::sqrt(dot_product(this, other));
+        return (*this - other).distance_from_source();
     }
 
     // returns a vector with the same direction as the original, but with length 1.
-    Vec2 normalize(const Vec2 &v)
+    Vec2 normalize()
     {
         double length = distance_from_source();
         if (length == 0.0) // division by 0
         {
             return Vec2{0, 0};
         }
-        return v / length;
+        return (*this / length);
     }
 
     // return value of x or y based on the orientation that we want
@@ -102,10 +160,17 @@ struct Vec2
     };
 };
 
+bool cmp_distance(Vec2 vector1, Vec2 vector2, Operator opp) {return cmp(vector1.distance_from_source(), vector2.distance_from_source(), opp);}
+
+bool cmp_angle(Vec2 vector1, Vec2 vector2, Operator opp) {return cmp(vector1.angle(), vector2.angle(), opp);}
+
+bool cmp_value(Vec2 vector1, Vec2 vector2, Operator opp, Orientation orientation) {return cmp(vector1.value(orientation), vector2.value(orientation), opp);}
+
 struct Dynamics
 {
     // Data needed for dynamics
     double m_mass{};
+    Figure figure{};
 
     // Linear movement
     Vec2 m_position{};
@@ -119,70 +184,6 @@ struct Dynamics
     double m_angvelocity{};
     double m_torque{};
 };
-
-template <typename T>
-bool cmp(T element1, T element2, Operator opp)
-{
-    switch (opp)
-    {
-    case Operator::eq:
-        if ((double)element1 && (double)element2)
-        {
-            return std::abs(element1 - element2) =< 0.000001;
-        }
-        return element1 == element2;
-
-    case Operator::ne:
-        if ((double)element1 && (double)element2)
-        {
-            return std::abs(element1 - element2) > 0.000001;
-        }
-        return element1 != element2;
-
-    case Operator::gt:
-        if ((double)element1 && (double)element2)
-        {
-            return element1 - element2 > 0.000001;
-        }
-        return element1 > element2;
-
-    case Operator::ge:
-        if ((double)element1 && (double)element2)
-        {
-            return element1 - element2 >= -0.000001;
-        }
-        return element1 >= element2;
-
-    case Operator::lt:
-        if ((double)element1 && (double)element2)
-        {
-            return element2 - element1 > 0.000001;
-        }
-        return element1 < element2;
-
-    case Operator::le:
-        if ((double)element1 && (double)element2)
-        {
-            return element2 - element1 >= -0.000001;
-        }
-        return element1 <= element2;
-    }
-}
-
-bool cmp_distance(Vec2 vector1, Vec2 vector2, Operator opp)
-{
-    return cmp(vector1.distance_from_source(), vector2.distance_from_source(), opp);
-}
-
-bool cmp_angle(Vec2 vector1, Vec2 vector2, Operator opp)
-{
-    return cmp(vector1.angle(), vector2.angle(), opp);
-}
-
-bool cmp_value(Vec2 vector1, Vec2 vector2, Operator opp, Orientation orientation)
-{
-    return cmp(vector1.value(orientation), vector2.value(orientation), opp);
-}
 
 // Superclass Shape
 class Shape
@@ -203,33 +204,48 @@ public:
     Shape &operator=(Shape &&) = default;      // move assignment
 
     // Getters
-    Vec2 getPos() const { return m_state.m_position; }
-    Vec2 getVelo() const { return m_state.m_velocity; }
     double getMass() const { return m_state.m_mass; }
+    Figure getFigure() const {return m_state.figure;}
+    Vec2 getPos() const { return m_state.m_position; }
+    Vec2 getVel() const { return m_state.m_velocity; }
+    Vec2 getAcc() const { return m_state.m_acceleration;}
+    Vec2 getForce() const {return m_state.m_force;}
+    double getAngle() const {return m_state.m_angle;}
+    double getInertia() const {return m_state.m_inertia;}
+    double getAngVel() const {return m_state.m_angvelocity;}
+    double getTorque() const {return m_state.m_torque;}
 
-    bool collides(const Shape &other) // Collision method for all shapes
-    {
-        //first we have to get the vector between the 2 shapes
-        //vector from A to B -> b-a
-        //vector from B to a -> a-b
-
-        //then we take the length of that vector using the distance method
-
-        //then we take the direction (angle) of the vector between the 2 shapes
-
-        //now using that angle we are going to determine the length from the middle of our shape 
-        //to its side
-
-        //now we take the sum of the 2 length's of each shapes distance from middle to side
-
-        //now we compare that length with the length of the vector between the 2 shapes
-
-        //if lt -> no collision, if ge -> collision
-    }
+    virtual double get_distance_MiddleToSide(double angle) const = 0;
 
 private:
     Dynamics m_state; // Struct that contains data useful for the shapes' movement
 };
+
+//function to use between shape-objects
+bool collides(const Shape &shape_A, const Shape &shape_B) // Collision checker for all shapes
+{
+    //first we have to take the position of each shape
+    Vec2 pos_A = shape_A.getPos();
+    Vec2 pos_B = shape_B.getPos();
+    //the we have to get the vector between the positions of the shapes
+    Vec2 AB = pos_B - pos_A;
+    Vec2 BA = pos_A - pos_B;
+    //then we take the length of that vector using the distance method
+    double length_AB = AB.distance_from_source(); //we dont have to take BA because it is the same
+    //then we take the direction's (angle) of the vector between the 2 positions for each shape
+    double angle_AB = AB.angle();
+    double angle_BA = BA.angle();
+    //now we get the real needed angle by also taking the offset of the current Shape's angle position
+    //now using that angle we are going to determine the length from the middle of our shape (position)
+    //to its side
+    double len_A = shape_A.get_distance_MiddleToSide(angle_AB - shape_A.getAngle());
+    double len_B = shape_B.get_distance_MiddleToSide(angle_BA - shape_B.getAngle());
+    //now we take the sum of the 2 length's of each shapes distance from middle to side
+    double len_total = len_A + len_B;
+    //now we compare that length with the length of the vector between the 2 shapes
+    if(len_total < length_AB) {return false;} //if lt -> no collision, if ge -> collision
+    return true;
+}
 
 // Circle Class
 class Circle : public Shape
@@ -244,15 +260,9 @@ public:
     Circle &operator=(Circle &&source) = default;     // move assignement
 
     // Shape-specific functions
+    Figure getFigure() { return Figure::Circle; }
     double getSize() { return size; };
-    bool collides(Circle &other)
-    {
-        if ((this->getPos().distance(other.getPos())) <= size + other.size)
-        {
-            return false;
-        }
-        return true;
-    }
+    double get_distance_MiddleToSide(double angle) const override {return size;} //for a Circle it's easy, the distance stays the same for each angle
     double getArea() const { return std::acos(-1) * size * size; } // area = pi * radius * radius
 
 private:
@@ -262,6 +272,7 @@ private:
 // Square class
 class Square : public Shape
 {
+public:
     // declarations
     Square(Dynamics state) : Shape(state) {};    // constructor
     ~Square();                                   // destructor
@@ -271,10 +282,9 @@ class Square : public Shape
     Square &operator=(Square &&) = default;      // move assignment
 
     // Shape-specific functions
+    Figure getFigure() { return Figure::Square; }
     double getSize() { return size; }
-    bool collides(Square &other) {
-        // we still have to implement this function
-    };
+    double get_distance_MiddleToSide(double angle) const override {return size / std::max(std::sin(angle),std::cos(angle));}
     double getArea() { return std::pow(size * 2, 2); } // area = edge^2 = (size*2)^2
 
 private:
@@ -284,6 +294,7 @@ private:
 // Triangle class
 class Triangle : public Shape
 {
+public:
     // declarations
     Triangle(Dynamics state, double size) : Shape(state) {}; // constructor
     ~Triangle();                                             // destructor
@@ -293,11 +304,9 @@ class Triangle : public Shape
     Triangle &operator=(Triangle &&) = default;              // move assignment
 
     // Shape-specific functions
+    Figure getFigure() { return Figure::Triangle; }
     double getSize() { return size; }
-    bool collides(const Triangle &other) const
-    {
-        // we still have to implement this function
-    }
+    double get_distance_MiddleToSide(double angle) const override { return size / std::max(std::sin(angle), std::cos(angle));}
     double getArea() const { return std::pow(size * 2, 2) / 2; } // area = edge^2 = ((size*2)^2)/2
 
 private:
@@ -307,6 +316,7 @@ private:
 // Rectangle class
 class Rectangle : public Shape
 {
+public: 
     // declarations
     Rectangle(Dynamics state, Vec2 dimensions) : Shape(state) {}; // constructor
     ~Rectangle();                                                 // destructor
@@ -316,10 +326,11 @@ class Rectangle : public Shape
     Rectangle &operator=(Rectangle &&) = default;                 // move assignment
 
     // Shape-specific functions
+    Figure getFigure() { return Figure::Rectangle; }
     Vec2 getDimensions() { return dimensions; }
-    bool collides(const Rectangle &other) const
+    double get_distance_MiddleToSide(double angle) const override
     {
-        // we still have to implement this
+        //we still have to implement this
     }
     double getArea() const { return dimensions.y * dimensions.x; } // area = base * height
 
