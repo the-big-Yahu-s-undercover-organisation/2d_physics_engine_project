@@ -64,11 +64,12 @@ struct Vec2
         }
     }
 
-    // return the angle of the vector in radians between interval [0; 2pi]
+    // return the angle of the vector in radians between interval [0; 2pi}
     double angle()
     {
+        if(x == 0 && y == 0) {return NULL;} //undefined -> no direction, so no angle either.
         double PI = std::acos(-1);
-        double angle = std::atan2(x, y);
+        double angle = std::atan2(y, x);
         if (angle < 0) // if angle is negative -> add 2pi
         {
             angle += 2 * PI;
@@ -113,15 +114,10 @@ struct Dynamics
     Vec2 m_force{};
 
     // Rotating
-    double m_current_angle{};
+    double m_angle{};
     double m_inertia{};
     double m_angvelocity{};
     double m_torque{};
-
-    double get_m_current_angle()
-    {
-        return m_position.angle(); // gives the angle in radians of the direction
-    }
 };
 
 template <typename T>
@@ -132,7 +128,7 @@ bool cmp(T element1, T element2, Operator opp)
     case Operator::eq:
         if ((double)element1 && (double)element2)
         {
-            return std::abs(element1 - element2) < 0.000001;
+            return std::abs(element1 - element2) =< 0.000001;
         }
         return element1 == element2;
 
@@ -153,7 +149,7 @@ bool cmp(T element1, T element2, Operator opp)
     case Operator::ge:
         if ((double)element1 && (double)element2)
         {
-            return element1 - element2 > 0.000000;
+            return element1 - element2 >= -0.000001;
         }
         return element1 >= element2;
 
@@ -167,7 +163,7 @@ bool cmp(T element1, T element2, Operator opp)
     case Operator::le:
         if ((double)element1 && (double)element2)
         {
-            return element2 - element1 > 0.000000;
+            return element2 - element1 >= -0.000001;
         }
         return element1 <= element2;
     }
@@ -211,7 +207,25 @@ public:
     Vec2 getVelo() const { return m_state.m_velocity; }
     double getMass() const { return m_state.m_mass; }
 
-    virtual bool collides(const Shape &other) const = 0; // Collision virtual method
+    bool collides(const Shape &other) // Collision method for all shapes
+    {
+        //first we have to get the vector between the 2 shapes
+        //vector from A to B -> b-a
+        //vector from B to a -> a-b
+
+        //then we take the length of that vector using the distance method
+
+        //then we take the direction (angle) of the vector between the 2 shapes
+
+        //now using that angle we are going to determine the length from the middle of our shape 
+        //to its side
+
+        //now we take the sum of the 2 length's of each shapes distance from middle to side
+
+        //now we compare that length with the length of the vector between the 2 shapes
+
+        //if lt -> no collision, if ge -> collision
+    }
 
 private:
     Dynamics m_state; // Struct that contains data useful for the shapes' movement
