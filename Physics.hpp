@@ -1,5 +1,6 @@
 // main source-code file
 #include <cmath>
+#include <algorithm>
 
 enum Orientation
 {
@@ -35,7 +36,7 @@ bool cmp(T element1, T element2, Operator opp)
     case Operator::eq:
         if ((double)element1 && (double)element2)
         {
-            return std::abs(element1 - element2) =< 0.000001;
+            return std::abs(element1 - element2) = < 0.000001;
         }
         return element1 == element2;
 
@@ -85,8 +86,10 @@ double dot_product(const Vec2 &v1, const Vec2 &v2)
 double normalize_angle(double angle)
 {
     double TWO_PI = 2.0 * std::acos(-1.0);
-    while (angle < 0) angle += TWO_PI;
-    while (angle >= TWO_PI) angle -= TWO_PI;
+    while (angle < 0)
+        angle += TWO_PI;
+    while (angle >= TWO_PI)
+        angle -= TWO_PI;
     return angle;
 }
 
@@ -98,7 +101,7 @@ struct Vec2
     // calculate distance to point source (0.0 ,0.0)
     double distance_from_source() // root(x^2 + y^2)
     {
-        return std::sqrt(x*x + y*y);
+        return std::sqrt(x * x + y * y);
     }
 
     // Calculate distance between two Vec2 (positions)
@@ -134,7 +137,10 @@ struct Vec2
     // return the angle of the vector in radians between interval [0; 2pi}
     double angle()
     {
-        if(x == 0 && y == 0) {return NULL;} //undefined -> no direction, so no angle either.
+        if (x == 0 && y == 0)
+        {
+            return NULL;
+        } // undefined -> no direction, so no angle either.
         double PI = std::acos(-1);
         double angle = std::atan2(y, x);
         if (angle < 0) // if angle is negative -> add 2pi
@@ -169,11 +175,11 @@ struct Vec2
     };
 };
 
-bool cmp_distance(Vec2 vector1, Vec2 vector2, Operator opp) {return cmp(vector1.distance_from_source(), vector2.distance_from_source(), opp);}
+bool cmp_distance(Vec2 vector1, Vec2 vector2, Operator opp) { return cmp(vector1.distance_from_source(), vector2.distance_from_source(), opp); }
 
-bool cmp_angle(Vec2 vector1, Vec2 vector2, Operator opp) {return cmp(vector1.angle(), vector2.angle(), opp);}
+bool cmp_angle(Vec2 vector1, Vec2 vector2, Operator opp) { return cmp(vector1.angle(), vector2.angle(), opp); }
 
-bool cmp_value(Vec2 vector1, Vec2 vector2, Operator opp, Orientation orientation) {return cmp(vector1.value(orientation), vector2.value(orientation), opp);}
+bool cmp_value(Vec2 vector1, Vec2 vector2, Operator opp, Orientation orientation) { return cmp(vector1.value(orientation), vector2.value(orientation), opp); }
 
 struct Dynamics
 {
@@ -214,15 +220,15 @@ public:
 
     // Getters
     double getMass() const { return m_state.m_mass; }
-    Figure getFigure() const {return m_state.figure;}
+    Figure getFigure() const { return m_state.figure; }
     Vec2 getPos() const { return m_state.m_position; }
     Vec2 getVel() const { return m_state.m_velocity; }
-    Vec2 getAcc() const { return m_state.m_acceleration;}
-    Vec2 getForce() const {return m_state.m_force;}
-    double getAngle() const {return m_state.m_angle;}
-    double getInertia() const {return m_state.m_inertia;}
-    double getAngVel() const {return m_state.m_angvelocity;}
-    double getTorque() const {return m_state.m_torque;}
+    Vec2 getAcc() const { return m_state.m_acceleration; }
+    Vec2 getForce() const { return m_state.m_force; }
+    double getAngle() const { return m_state.m_angle; }
+    double getInertia() const { return m_state.m_inertia; }
+    double getAngVel() const { return m_state.m_angvelocity; }
+    double getTorque() const { return m_state.m_torque; }
 
     virtual double get_distance_MiddleToSide(double angle) const = 0;
 
@@ -230,20 +236,32 @@ private:
     Dynamics m_state; // Struct that contains data useful for the shapes' movement
 };
 
-//function to use between shape-objects
+// function to use between shape-objects
 bool collides(const Shape &shape_A, const Shape &shape_B) // Collision checker for all shapes
 {
     Vec2 AB = shape_B.getPos() - shape_A.getPos();
     double AB_len = AB.distance_from_source();
-    if(AB_len == 0.0) {return true;}
+    if (AB_len == 0.0)
+    {
+        return true;
+    }
     double AB_angle = AB.angle();
     double PI = std::acos(-1);
     double BA_angle;
-    if(AB_angle <= PI) {BA_angle = AB_angle + PI;}
-    else{BA_angle = AB_angle - PI;}
+    if (AB_angle <= PI)
+    {
+        BA_angle = AB_angle + PI;
+    }
+    else
+    {
+        BA_angle = AB_angle - PI;
+    }
     double len_A = shape_A.get_distance_MiddleToSide(normalize_angle(AB_angle - shape_A.getAngle()));
     double len_B = shape_B.get_distance_MiddleToSide(normalize_angle(BA_angle - shape_B.getAngle()));
-    if(len_A + len_B < AB_len) {return false;} 
+    if (len_A + len_B < AB_len)
+    {
+        return false;
+    }
     return true;
 }
 
@@ -252,18 +270,18 @@ class Circle : public Shape
 {
 public:
     // declarations
-    Circle(Dynamics state) : Shape(state), size{size} {};         // constructor
-    ~Circle();                                        // destructor
-    Circle(Circle &other) = default;                  // copy constructor
-    Circle(Circle &&source) = default;                // move constructor
-    Circle &operator=(const Circle &other) = default; // copy assignment
-    Circle &operator=(Circle &&source) = default;     // move assignement
+    Circle(Dynamics state) : Shape(state), size{size} {}; // constructor
+    ~Circle();                                            // destructor
+    Circle(Circle &other) = default;                      // copy constructor
+    Circle(Circle &&source) = default;                    // move constructor
+    Circle &operator=(const Circle &other) = default;     // copy assignment
+    Circle &operator=(Circle &&source) = default;         // move assignement
 
     // Shape-specific functions
     Figure getFigure() { return Figure::Circle; }
     double getSize() { return size; };
-    double get_distance_MiddleToSide(double angle) const override {return size;} //for a Circle it's easy, the distance stays the same for each angle
-    double getArea() const { return std::acos(-1) * size * size; } // area = pi * radius * radius
+    double get_distance_MiddleToSide(double angle) const override { return size; } // for a Circle it's easy, the distance stays the same for each angle
+    double getArea() const { return std::acos(-1) * size * size; }                 // area = pi * radius * radius
 
 private:
     double size{};
@@ -274,17 +292,17 @@ class Square : public Shape
 {
 public:
     // declarations
-    Square(Dynamics state) : Shape(state), size{size} {};    // constructor
-    ~Square();                                   // destructor
-    Square(Shape &other);                        // copy constructor
-    Square(Shape &&source);                      // move constructor
-    Square &operator=(const Square &) = default; // copy assignment
-    Square &operator=(Square &&) = default;      // move assignment
+    Square(Dynamics state) : Shape(state), size{size} {}; // constructor
+    ~Square();                                            // destructor
+    Square(Shape &other);                                 // copy constructor
+    Square(Shape &&source);                               // move constructor
+    Square &operator=(const Square &) = default;          // copy assignment
+    Square &operator=(Square &&) = default;               // move assignment
 
     // Shape-specific functions
     Figure getFigure() { return Figure::Square; }
     double getSize() { return size; }
-    double get_distance_MiddleToSide(double angle) const override {return size / std::max(std::abs(std::sin(angle)),std::abs(std::cos(angle)));}
+    double get_distance_MiddleToSide(double angle) const override { return size / std::max(std::abs(std::sin(angle)), std::abs(std::cos(angle))); }
     double getArea() { return std::pow(size * 2, 2); } // area = edge^2 = (size*2)^2
 
 private:
@@ -297,18 +315,18 @@ class Triangle : public Shape
 public:
     // declarations
     Triangle(Dynamics state, double size) : Shape(state), size{size} {}; // constructor
-    ~Triangle();                                             // destructor
-    Triangle(Shape &other);                                  // copy constructor
-    Triangle(Shape &&source);                                // move constructor
-    Triangle &operator=(const Triangle &) = default;         // copy assignment
-    Triangle &operator=(Triangle &&) = default;              // move assignment
+    ~Triangle();                                                         // destructor
+    Triangle(Shape &other);                                              // copy constructor
+    Triangle(Shape &&source);                                            // move constructor
+    Triangle &operator=(const Triangle &) = default;                     // copy assignment
+    Triangle &operator=(Triangle &&) = default;                          // move assignment
 
     // Shape-specific functions
     Figure getFigure() { return Figure::Triangle; }
     double getSize() { return size; }
-    double get_distance_MiddleToSide(double angle) const override 
-    { 
-        const double period = 2.0 * std::acos(-1.0) / 3.0; 
+    double get_distance_MiddleToSide(double angle) const override
+    {
+        const double period = 2.0 * std::acos(-1.0) / 3.0;
         return size / std::cos(std::remainder(angle, period));
     }
     double getArea() const { return std::pow(size * 2, 2) / 2; } // area = edge^2 = ((size*2)^2)/2
@@ -317,52 +335,51 @@ private:
     double size{};
 };
 
-//Pentagon class
+// Pentagon class
 class Pentagon : public Shape
 {
-    //declarations
-    Pentagon(Dynamics state, Vec2 dimensions) : Shape(state), size{size} {}; //constructor
-    ~Pentagon();                                                 // destructor
-    Pentagon(Shape &other);                                      // copy constructor
-    Pentagon(Shape &&source);                                    // move constructor
-    Pentagon &operator=(const Pentagon &) = default;             // copy assignment
-    Pentagon &operator=(Pentagon &&) = default;                  // move assignment
-    
-    //shape-specific functions
-    Figure getFigure() { return Figure::Pentagon;}
-    double getSize() {return size;}
+    // declarations
+    Pentagon(Dynamics state, Vec2 dimensions) : Shape(state), size{size} {}; // constructor
+    ~Pentagon();                                                             // destructor
+    Pentagon(Shape &other);                                                  // copy constructor
+    Pentagon(Shape &&source);                                                // move constructor
+    Pentagon &operator=(const Pentagon &) = default;                         // copy assignment
+    Pentagon &operator=(Pentagon &&) = default;                              // move assignment
+
+    // shape-specific functions
+    Figure getFigure() { return Figure::Pentagon; }
+    double getSize() { return size; }
     double get_distance_MiddleToSide(double angle) const override
     {
         // we still have to implement this
     }
-    double getArea() const 
+    double getArea() const
     {
         // we still have to implement this
     }
 
-    private:
+private:
     double size{};
-
 };
 
 // Rectangle class
 class Rectangle : public Shape
 {
-public: 
+public:
     // declarations
     Rectangle(Dynamics state, Vec2 dimensions) : Shape(state), dimensions{dimensions} {}; // constructor
-    ~Rectangle();                                                 // destructor
-    Rectangle(Shape &other);                                      // copy constructor
-    Rectangle(Shape &&source);                                    // move constructor
-    Rectangle &operator=(const Rectangle &) = default;            // copy assignment
-    Rectangle &operator=(Rectangle &&) = default;                 // move assignment
+    ~Rectangle();                                                                         // destructor
+    Rectangle(Shape &other);                                                              // copy constructor
+    Rectangle(Shape &&source);                                                            // move constructor
+    Rectangle &operator=(const Rectangle &) = default;                                    // copy assignment
+    Rectangle &operator=(Rectangle &&) = default;                                         // move assignment
 
     // Shape-specific functions
     Figure getFigure() { return Figure::Rectangle; }
     Vec2 getDimensions() { return dimensions; }
     double get_distance_MiddleToSide(double angle) const override
     {
-        //we still have to implement this
+        // we still have to implement this
     }
     double getArea() const { return dimensions.y * dimensions.x; } // area = base * height
 
