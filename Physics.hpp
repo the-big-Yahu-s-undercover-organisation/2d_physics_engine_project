@@ -1,6 +1,7 @@
 // main source-code file
 #include <cmath>
 #include <algorithm>
+#include <vector>
 
 enum Orientation
 {
@@ -231,6 +232,7 @@ public:
     double getTorque() const { return m_state.m_torque; }
 
     virtual double get_distance_MiddleToSide(double angle) const = 0;
+    virtual std::vector<Vec2> getVertices() const = 0;
 
 private:
     Dynamics m_state; // Struct that contains data useful for the shapes' movement
@@ -282,6 +284,12 @@ public:
     double getSize() { return size; };
     double get_distance_MiddleToSide(double angle) const override { return size; } // for a Circle it's easy, the distance stays the same for each angle
     double getArea() const { return std::acos(-1) * size * size; }                 // area = pi * radius * radius
+    std::vector<Vec2> getVertices() const override
+    {
+        std::vector<Vec2> vertices{};
+        vertices.push_back(getPos());
+        return vertices;
+    }
 
 private:
     double size{};
@@ -293,9 +301,9 @@ class Square : public Shape
 public:
     // declarations
     Square(Dynamics state) : Shape(state), size{size} {}; // constructor
-    ~Square();                                            // destructor
-    Square(Shape &other);                                 // copy constructor
-    Square(Shape &&source);                               // move constructor
+    ~Square() = default;                                  // destructor
+    Square(Square &other) = default;                      // copy constructor
+    Square(Square &&source) = default;                    // move constructor
     Square &operator=(const Square &) = default;          // copy assignment
     Square &operator=(Square &&) = default;               // move assignment
 
@@ -304,6 +312,31 @@ public:
     double getSize() { return size; }
     double get_distance_MiddleToSide(double angle) const override { return size / std::max(std::abs(std::sin(angle)), std::abs(std::cos(angle))); }
     double getArea() { return std::pow(size * 2, 2); } // area = edge^2 = (size*2)^2
+    std::vector<Vec2> getVertices() const override
+    {
+        std::vector<Vec2> vertices{};
+        Vec2 position = getPos();
+
+        double cos = std::cos(getAngle());
+        double sin = std::sin(getAngle());
+
+        auto rotate_and_translate = [position, cos, sin](double this_x, double this_y) -> Vec2
+        {
+            Vec2 vertex;
+
+            vertex.x = position.x + (this_x * cos - this_y * sin);
+            vertex.y = position.y + (this_x * cos + this_y * sin);
+
+            return vertex;
+        };
+
+        vertices.push_back(rotate_and_translate(-size, -size));
+        vertices.push_back(rotate_and_translate(-size, size));
+        vertices.push_back(rotate_and_translate(size, size));
+        vertices.push_back(rotate_and_translate(size, -size));
+
+        return vertices;
+    }
 
 private:
     double size{};
@@ -329,7 +362,7 @@ public:
         const double period = 2.0 * std::acos(-1.0) / 3.0;
         return size / std::cos(std::remainder(angle, period));
     }
-    double getArea() const { return std::pow(size * 2, 2) / 2; } // area = edge^2 = ((size*2)^2)/2
+    double getArea() const { return 3.0 * std::sqrt(3.0) / 4.0 * (size * size); } // area = edge^2 = ((size*2)^2)/2
 
 private:
     double size{};
