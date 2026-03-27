@@ -348,9 +348,9 @@ class Triangle : public Shape
 public:
     // declarations
     Triangle(Dynamics state, double size) : Shape(state), size{size} {}; // constructor
-    ~Triangle();                                                         // destructor
-    Triangle(Shape &other);                                              // copy constructor
-    Triangle(Shape &&source);                                            // move constructor
+    ~Triangle() = default;                                               // destructor
+    Triangle(Triangle &other) = default;                                 // copy constructor
+    Triangle(Triangle &&source) = default;                               // move constructor
     Triangle &operator=(const Triangle &) = default;                     // copy assignment
     Triangle &operator=(Triangle &&) = default;                          // move assignment
 
@@ -363,6 +363,32 @@ public:
         return size / std::cos(std::remainder(angle, period));
     }
     double getArea() const { return 3.0 * std::sqrt(3.0) / 4.0 * (size * size); } // area = edge^2 = ((size*2)^2)/2
+    std::vector<Vec2> getVertices() const override
+    {
+        std::vector<Vec2> vertices;
+        Vec2 position = getPos();
+
+        double cos = std::cos(getAngle());
+        double sin = std::sin(getAngle());
+
+        auto rotate_and_translate = [position, cos, sin](double this_x, double this_y) -> Vec2
+        {
+            Vec2 vertex{};
+
+            vertex.x = position.x + (this_x * cos - this_y * sin);
+            vertex.y = position.y + (this_x * cos + this_y * sin);
+
+            return vertex;
+        };
+
+        double root3 = std::sqrt(3);
+
+        vertices.push_back(rotate_and_translate(size, 0));
+        vertices.push_back(rotate_and_translate(-size / 2.0, root3 * size / 2.0));
+        vertices.push_back(rotate_and_translate(-size / 2.0, root3 * -size / 2.0));
+
+        return vertices;
+    }
 
 private:
     double size{};
