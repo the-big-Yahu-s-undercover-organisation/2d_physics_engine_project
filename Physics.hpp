@@ -325,7 +325,7 @@ public:
             Vec2 vertex;
 
             vertex.x = position.x + (this_x * cos - this_y * sin);
-            vertex.y = position.y + (this_x * cos + this_y * sin);
+            vertex.y = position.y + (this_x * sin + this_y * cos);
 
             return vertex;
         };
@@ -376,7 +376,7 @@ public:
             Vec2 vertex{};
 
             vertex.x = position.x + (this_x * cos - this_y * sin);
-            vertex.y = position.y + (this_x * cos + this_y * sin);
+            vertex.y = position.y + (this_x * sin + this_y * cos);
 
             return vertex;
         };
@@ -399,9 +399,9 @@ class Pentagon : public Shape
 {
     // declarations
     Pentagon(Dynamics state, Vec2 dimensions) : Shape(state), size{size} {}; // constructor
-    ~Pentagon();                                                             // destructor
-    Pentagon(Shape &other);                                                  // copy constructor
-    Pentagon(Shape &&source);                                                // move constructor
+    ~Pentagon() = default;                                                   // destructor
+    Pentagon(Pentagon &other) = default;                                     // copy constructor
+    Pentagon(Pentagon &&source) = default;                                   // move constructor
     Pentagon &operator=(const Pentagon &) = default;                         // copy assignment
     Pentagon &operator=(Pentagon &&) = default;                              // move assignment
 
@@ -427,9 +427,9 @@ class Rectangle : public Shape
 public:
     // declarations
     Rectangle(Dynamics state, Vec2 dimensions) : Shape(state), dimensions{dimensions} {}; // constructor
-    ~Rectangle();                                                                         // destructor
-    Rectangle(Shape &other);                                                              // copy constructor
-    Rectangle(Shape &&source);                                                            // move constructor
+    ~Rectangle() = default;                                                               // destructor
+    Rectangle(Rectangle &other) = default;                                                // copy constructor
+    Rectangle(Rectangle &&source) = default;                                              // move constructor
     Rectangle &operator=(const Rectangle &) = default;                                    // copy assignment
     Rectangle &operator=(Rectangle &&) = default;                                         // move assignment
 
@@ -441,6 +441,31 @@ public:
         // we still have to implement this
     }
     double getArea() const { return dimensions.y * dimensions.x; } // area = base * height
+
+    std::vector<Vec2> getVertices() const override
+    {
+        std::vector<Vec2> vertices{};
+        Vec2 position = getPos();
+
+        double cos = std::cos(getAngle());
+        double sin = std::sin(getAngle());
+
+        auto rotate_and_translate = [position, cos, sin](double this_x, double this_y) -> Vec2
+        {
+            Vec2 vertex{};
+
+            vertex.x = position.x + (this_x * cos - this_y * sin);
+            vertex.y = position.y + (this_x * sin + this_y * cos);
+
+            return vertex;
+        };
+        vertices.push_back(rotate_and_translate(-(dimensions.x / 2.0), -(dimensions.y / 2.0)));
+        vertices.push_back(rotate_and_translate(-(dimensions.x / 2.0), (dimensions.y / 2.0)));
+        vertices.push_back(rotate_and_translate((dimensions.x / 2.0), (dimensions.y / 2.0)));
+        vertices.push_back(rotate_and_translate((dimensions.x / 2.0), -(dimensions.y / 2.0)));
+
+        return vertices;
+    }
 
 private:
     Vec2 dimensions{};
