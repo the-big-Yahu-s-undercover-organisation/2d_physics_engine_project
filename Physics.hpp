@@ -251,7 +251,7 @@ class Circle : public Shape
 {
 public:
     // declarations
-    Circle(Dynamics state) : Shape(state) {};         // constructor
+    Circle(Dynamics state) : Shape(state), size{size} {};         // constructor
     ~Circle();                                        // destructor
     Circle(Circle &other) = default;                  // copy constructor
     Circle(Circle &&source) = default;                // move constructor
@@ -273,7 +273,7 @@ class Square : public Shape
 {
 public:
     // declarations
-    Square(Dynamics state) : Shape(state) {};    // constructor
+    Square(Dynamics state) : Shape(state), size{size} {};    // constructor
     ~Square();                                   // destructor
     Square(Shape &other);                        // copy constructor
     Square(Shape &&source);                      // move constructor
@@ -295,7 +295,7 @@ class Triangle : public Shape
 {
 public:
     // declarations
-    Triangle(Dynamics state, double size) : Shape(state) {}; // constructor
+    Triangle(Dynamics state, double size) : Shape(state), size{size} {}; // constructor
     ~Triangle();                                             // destructor
     Triangle(Shape &other);                                  // copy constructor
     Triangle(Shape &&source);                                // move constructor
@@ -307,7 +307,8 @@ public:
     double getSize() { return size; }
     double get_distance_MiddleToSide(double angle) const override 
     { 
-        //we still have to implement this
+        const double period = 2.0 * std::acos(-1.0) / 3.0; 
+        return size / std::cos(std::remainder(angle, period));
     }
     double getArea() const { return std::pow(size * 2, 2) / 2; } // area = edge^2 = ((size*2)^2)/2
 
@@ -320,7 +321,7 @@ class Rectangle : public Shape
 {
 public: 
     // declarations
-    Rectangle(Dynamics state, Vec2 dimensions) : Shape(state) {}; // constructor
+    Rectangle(Dynamics state, Vec2 dimensions) : Shape(state), dimensions{dimensions} {}; // constructor
     ~Rectangle();                                                 // destructor
     Rectangle(Shape &other);                                      // copy constructor
     Rectangle(Shape &&source);                                    // move constructor
