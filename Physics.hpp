@@ -24,6 +24,7 @@ enum Figure
     Square,
     Triangle,
     Rectangle,
+    Pentagon,
 };
 
 template <typename T>
@@ -314,6 +315,34 @@ public:
 
 private:
     double size{};
+};
+
+//Pentagon class
+class Pentagon : public Shape
+{
+    //declarations
+    Pentagon(Dynamics state, Vec2 dimensions) : Shape(state), size{size} {}; //constructor
+    ~Pentagon();                                                 // destructor
+    Pentagon(Shape &other);                                      // copy constructor
+    Pentagon(Shape &&source);                                    // move constructor
+    Pentagon &operator=(const Pentagon &) = default;             // copy assignment
+    Pentagon &operator=(Pentagon &&) = default;                  // move assignment
+    
+    //shape-specific functions
+    Figure getFigure() { return Figure::Pentagon;}
+    double getSize() {return size;}
+    double get_distance_MiddleToSide(double angle) const override
+    {
+        // we still have to implement this
+    }
+    double getArea() const 
+    {
+        // we still have to implement this
+    }
+
+    private:
+    double size{};
+
 };
 
 // Rectangle class
