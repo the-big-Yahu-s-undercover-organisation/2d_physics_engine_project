@@ -105,6 +105,12 @@ struct Vec2
         return std::sqrt(x * x + y * y);
     }
 
+    // calculate the magnitude
+    double magnitude()
+    {
+        return std::sqrt(std::pow(x, 2) + std::pow(y, 2));
+    }
+
     // Calculate distance between two Vec2 (positions)
     double distance(const Vec2 other)
     {
@@ -149,6 +155,16 @@ struct Vec2
             angle += 2 * PI;
         }
         return angle;
+    }
+
+    Vec2 Vproject(Vec2 &dest) const
+    {
+        return dest * (dot_product(this, dest) / dest.magnitude());
+    }
+
+    double oneDproject(Vec2 &dest) const
+    {
+        return dot_product(this, dest);
     }
 
     // Operator overloading
@@ -274,12 +290,42 @@ public:
 
         return normals;
     }
+    bool collides(const Shape &other) const
+    {
+        std::vector<Vec2> normals{getNormals()};
+        std::vector<Vec2> normals2{other.getNormals()};
+        normals.insert(normals.end(), normals2.begin(), normals2.end()); // Make 1 big list of normal vectors.
+        std::vector<Vec2> vertices{getVertices()};
+        std::vector<Vec2> vertices2{other.getVertices()};
+        for (const Vec2 &v : normals)
+        {
+            double minA, maxA, minB, maxB;
+        }
+    }
+    void project_and_find(const Shape &shape, Vec2 &v, double &min, double &max)
+    {
+        std::vector<Vec2> vertices{shape.getVertices()};
+
+        for (const Vec2 &vertex : vertices)
+        {
+            double projection = vertex.oneDproject(v);
+            if (projection > max)
+            {
+                max = projection;
+            }
+            else if (projection < min)
+            {
+                min = projection;
+            }
+        }
+    }
 
 private:
     Dynamics m_state; // Struct that contains data useful for the shapes' movement
 };
 
 // function to use between shape-objects
+/*
 bool collides(const Shape &shape_A, const Shape &shape_B) // Collision checker for all shapes
 {
     Vec2 AB = shape_B.getPos() - shape_A.getPos();
@@ -307,6 +353,7 @@ bool collides(const Shape &shape_A, const Shape &shape_B) // Collision checker f
     }
     return true;
 }
+*/
 
 // Circle Class
 class Circle : public Shape
