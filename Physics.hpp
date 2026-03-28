@@ -233,6 +233,26 @@ public:
 
     virtual double get_distance_MiddleToSide(double angle) const = 0;
     virtual std::vector<Vec2> getVertices() const = 0;
+    std::vector<Vec2> getEdgeVectors() const
+    {
+        if (getFigure() == Figure::Circle)
+        {
+            return {}; // A circle doesnt have edge vectors
+        }
+        std::vector<Vec2> edges{};
+        std::vector<Vec2> vertices{getVertices()};
+
+        int amount{vertices.size()};
+        for (int i = 0; i < amount; i++)
+        {
+            Vec2 first{vertices[i]};
+            Vec2 next{vertices[(i + 1) % amount]}; // We take the next (if the last, we take the first)
+            Vec2 edge = next - first;
+            edges.push_back(edge);
+        }
+        // No check of coordinates needed, because the vertices are stored counter clockwise.
+        return edges;
+    }
 
 private:
     Dynamics m_state; // Struct that contains data useful for the shapes' movement
@@ -319,21 +339,21 @@ public:
 
         double cos = std::cos(getAngle());
         double sin = std::sin(getAngle());
-
+        // lambda function to account for the rotation of the shape
         auto rotate_and_translate = [position, cos, sin](double this_x, double this_y) -> Vec2
         {
             Vec2 vertex;
 
-            vertex.x = position.x + (this_x * cos - this_y * sin);
-            vertex.y = position.y + (this_x * sin + this_y * cos);
+            vertex.x = position.x + (this_x * cos - this_y * sin); // x' = xposition + (x * cos(angle) - y*sin(angle))
+            vertex.y = position.y + (this_x * sin + this_y * cos); // y' = yposition + (x * sin(angle) + y * cos(angle))
 
             return vertex;
         };
 
-        vertices.push_back(rotate_and_translate(-size, -size));
-        vertices.push_back(rotate_and_translate(-size, size));
-        vertices.push_back(rotate_and_translate(size, size));
-        vertices.push_back(rotate_and_translate(size, -size));
+        vertices.push_back(rotate_and_translate(-size, -size)); // left bottom
+        vertices.push_back(rotate_and_translate(-size, size));  // left top
+        vertices.push_back(rotate_and_translate(size, size));   // right top
+        vertices.push_back(rotate_and_translate(size, -size));  // right bottom
 
         return vertices;
     }
@@ -370,22 +390,22 @@ public:
 
         double cos = std::cos(getAngle());
         double sin = std::sin(getAngle());
-
+        // lambda function to account for the rotation of the shape
         auto rotate_and_translate = [position, cos, sin](double this_x, double this_y) -> Vec2
         {
             Vec2 vertex{};
 
-            vertex.x = position.x + (this_x * cos - this_y * sin);
-            vertex.y = position.y + (this_x * sin + this_y * cos);
+            vertex.x = position.x + (this_x * cos - this_y * sin); // x' = xposition + (x * cos(angle) - y*sin(angle))
+            vertex.y = position.y + (this_x * sin + this_y * cos); // y' = yposition + (x * sin(angle) + y * cos(angle))
 
             return vertex;
         };
 
         double root3 = std::sqrt(3);
 
-        vertices.push_back(rotate_and_translate(size, 0));
-        vertices.push_back(rotate_and_translate(-size / 2.0, root3 * size / 2.0));
-        vertices.push_back(rotate_and_translate(-size / 2.0, root3 * -size / 2.0));
+        vertices.push_back(rotate_and_translate(size, 0));                          // right
+        vertices.push_back(rotate_and_translate(-size / 2.0, root3 * size / 2.0));  // top
+        vertices.push_back(rotate_and_translate(-size / 2.0, root3 * -size / 2.0)); // bottom
 
         return vertices;
     }
@@ -450,19 +470,20 @@ public:
         double cos = std::cos(getAngle());
         double sin = std::sin(getAngle());
 
+        // lambda function to account for the rotation of the shape
         auto rotate_and_translate = [position, cos, sin](double this_x, double this_y) -> Vec2
         {
             Vec2 vertex{};
 
-            vertex.x = position.x + (this_x * cos - this_y * sin);
-            vertex.y = position.y + (this_x * sin + this_y * cos);
+            vertex.x = position.x + (this_x * cos - this_y * sin); // x' = xposition + (x * cos(angle) - y*sin(angle))
+            vertex.y = position.y + (this_x * sin + this_y * cos); // y' = yposition + (x * sin(angle) + y * cos(angle))
 
             return vertex;
         };
-        vertices.push_back(rotate_and_translate(-(dimensions.x / 2.0), -(dimensions.y / 2.0)));
-        vertices.push_back(rotate_and_translate(-(dimensions.x / 2.0), (dimensions.y / 2.0)));
-        vertices.push_back(rotate_and_translate((dimensions.x / 2.0), (dimensions.y / 2.0)));
-        vertices.push_back(rotate_and_translate((dimensions.x / 2.0), -(dimensions.y / 2.0)));
+        vertices.push_back(rotate_and_translate(-(dimensions.x / 2.0), -(dimensions.y / 2.0))); // left bottom
+        vertices.push_back(rotate_and_translate(-(dimensions.x / 2.0), (dimensions.y / 2.0)));  // left top
+        vertices.push_back(rotate_and_translate((dimensions.x / 2.0), (dimensions.y / 2.0)));   // right top
+        vertices.push_back(rotate_and_translate((dimensions.x / 2.0), -(dimensions.y / 2.0)));  // right bottom
 
         return vertices;
     }
