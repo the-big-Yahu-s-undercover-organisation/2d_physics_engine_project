@@ -253,6 +253,27 @@ public:
         // No check of coordinates needed, because the vertices are stored counter clockwise.
         return edges;
     }
+    std::vector<Vec2> getNormals() const
+    {
+        std::vector<Vec2> normals{};
+        std::vector<Vec2> to_be_normalized{getEdgeVectors()};
+
+        auto getnormal = [](Vec2 vector) -> Vec2
+        {
+            Vec2 normal{};
+            normal.x = -vector.y;
+            normal.y = vector.x;
+            // let vector be (x, y). Then the normal is either (-y, x) or (y, -x)
+            return normal;
+        };
+
+        for (const auto &v : to_be_normalized)
+        {
+            normals.push_back(getnormal(v).normalize());
+        }
+
+        return normals;
+    }
 
 private:
     Dynamics m_state; // Struct that contains data useful for the shapes' movement
