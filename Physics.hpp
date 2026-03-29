@@ -162,7 +162,7 @@ struct Vec2
         return dest * (dot_product(this, dest) / dest.magnitude());
     }
 
-    double oneDproject(Vec2 &dest) const
+    double oneDproject(const Vec2 &dest) const
     {
         return dot_product(this, dest);
     }
@@ -246,6 +246,7 @@ public:
     double getInertia() const { return m_state.m_inertia; }
     double getAngVel() const { return m_state.m_angvelocity; }
     double getTorque() const { return m_state.m_torque; }
+    virtual double getSize() const {};
 
     virtual double get_distance_MiddleToSide(double angle) const = 0;
     virtual std::vector<Vec2> getVertices() const = 0;
@@ -292,30 +293,107 @@ public:
     }
     bool collides(const Shape &other) const
     {
+        // If both are circles. The logic is simple
+        if (this->getFigure() == Figure::Circle && other.getFigure() == Figure::Circle)
+        {
+            double r1 = this->getSize();
+            double r2 = other.getSize();
+            Vec2 pos1 = this->getPos();
+            Vec2 pos2 = other.getPos();
+            if (pos1.distance(pos2) <= r1 + r2)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         std::vector<Vec2> normals{getNormals()};
         std::vector<Vec2> normals2{other.getNormals()};
         normals.insert(normals.end(), normals2.begin(), normals2.end()); // Make 1 big list of normal vectors.
-        std::vector<Vec2> vertices{getVertices()};
-        std::vector<Vec2> vertices2{other.getVertices()};
+        // If either one is a circle we have to change the logic a bit.
+        const std::vector<Vec2> vertices{getVertices()};
+        const std::vector<Vec2> vertices2{other.getVertices()};
+        if ((this->getFigure() == Figure::Circle && other.getFigure() != Figure::Circle) || (this->getFigure() != Figure::Circle && other.getFigure() == Figure::Circle))
+        {
+            Vec2 closestVertex{};
+            Vec2 pos1 = this->getPos();
+            Vec2 pos2 = other.getPos();
+            auto findClosest = [](const std::vector<Vec2> &vertices, Vec2 pos) -> Vec2
+            {
+                Vec2 closest{};
+                double dclosest{};
+                if (vertices.size())
+                {
+                    closest = vertices[0];
+                    dclosest = closest.distance(pos);
+                }
+                for (const Vec2 &v : vertices)
+                {
+                    double dcurrent = pos.distance(v);
+                    if (dcurrent < dclosest)
+                    {
+                        closest = v;
+                        dclosest = dcurrent;
+                    }
+                }
+                return closest;
+            };
+            Vec2 extraVector{};
+            if (this->getFigure() != Figure::Circle)
+            {
+                closestVertex = findClosest(vertices, pos2);
+                extraVector = pos2 - closestVertex;
+            }
+            else
+            {
+                closestVertex = findClosest(vertices2, pos1);
+                extraVector = pos1 - closestVertex;
+            }
+            normals.push_back(extraVector.normalize());
+        }
         for (const Vec2 &v : normals)
         {
             double minA, maxA, minB, maxB;
+
+            project_and_find(*this, vertices, v, minA, maxA);
+            project_and_find(other, vertices2, v, minB, maxB);
+
+            if (maxA < minB || maxB < minA)
+            {
+                return false;
+            }
         }
+        return true;
     }
-    void project_and_find(const Shape &shape, Vec2 &v, double &min, double &max)
+    void project_and_find(const Shape &shape, const std::vector<Vec2> &vertices, const Vec2 &v, double &min, double &max) const
     {
-        std::vector<Vec2> vertices{shape.getVertices()};
+        if (shape.getFigure() == Figure::Circle)
+        {
+            // With circles the logic is a bit different
+            Vec2 pos = shape.getPos();
+            min = pos.oneDproject(v) - shape.getSize();
+            max = pos.oneDproject(v) + shape.getSize();
+
+            return;
+        }
+        bool maxFirst = true;
+        bool minFirst = true;
 
         for (const Vec2 &vertex : vertices)
         {
+            // We find the minimum and maximum projections as our "edges" of our shadows.
             double projection = vertex.oneDproject(v);
-            if (projection > max)
+            if (projection > max || maxFirst)
             {
                 max = projection;
+                maxFirst = false;
             }
-            else if (projection < min)
+            if (projection < min || minFirst)
             {
                 min = projection;
+                minFirst = false;
             }
         }
     }
@@ -361,7 +439,7 @@ class Circle : public Shape
 public:
     // declarations
     Circle(Dynamics state) : Shape(state), size{size} {}; // constructor
-    ~Circle();                                            // destructor
+    ~Circle() = default;                                  // destructor
     Circle(Circle &other) = default;                      // copy constructor
     Circle(Circle &&source) = default;                    // move constructor
     Circle &operator=(const Circle &other) = default;     // copy assignment
