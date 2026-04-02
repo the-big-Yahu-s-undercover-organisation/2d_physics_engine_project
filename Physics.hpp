@@ -77,11 +77,7 @@ bool cmp(T element1, T element2, Operator opp)
     }
 }
 
-// function to measure directional similarity between two vectors
-double dot_product(const Vec2 &v1, const Vec2 &v2)
-{
-    return v1.x * v2.x + v1.y * v2.y; // x1*x2 + y1*y2
-}
+
 
 double normalize_angle(double angle)
 {
@@ -95,13 +91,102 @@ double normalize_angle(double angle)
 
 struct Vec2
 {
+ 
+    //data of the struct 
     double y{};
     double x{};
+
+    //methods of the struct
+    Vec2(double x_value, double y_value ) //constructor
+    {
+        x = x_value;
+        y = y_value;
+    }
+    ~Vec2() = default; //destructor
+    Vec2(Vec2 &other) = default; //copy
+    Vec2(Vec2 &&source) = default; //move
+    Vec2 &operator=(const Vec2 &other) = default;     // copy assignment
+    Vec2 &operator=(Vec2 &&source) = default;         // move assignement
+
+    // Operator overloading
+
+    //Vec2 _ Vec2 operations
+    Vec2 &operator+=(const Vec2 &v)
+    {
+        x += v.x;
+        y += v.y;
+        return *this;
+    };
+    Vec2 operator+(Vec2 &v) { return *this += v; }
+    Vec2 &operator-=(const Vec2 &v)
+    {
+        x -= v.x;
+        y -= v.y;
+        return *this;
+    };
+    Vec2 operator-( const Vec2 &v) { return *this -= v; }
+    Vec2 &operator*=(const Vec2 &v)
+    {
+        x *= v.x;
+        y *= v.y;
+        return *this;
+    };
+    Vec2 operator*( const Vec2 &v) { return *this *= v; }
+    Vec2 &operator/=(const Vec2 &v)
+    {
+        x /= v.x;
+        y /= v.y;
+        return *this;
+    };
+    Vec2 operator-( const Vec2 &v) { return *this /= v; }
+
+    //Vec2 _ double operations
+    Vec2 &operator+=(const double &s)
+    {
+        x += s;
+        y += s;
+        return *this;
+    };
+    Vec2 operator+(double &s) { return *this += s; }
+    Vec2 &operator-=(const double &s)
+    {
+        x -= s;
+        y -= s;
+        return *this;
+    };
+    Vec2 operator-(double &s) { return *this -= s; }
+    Vec2 &operator*=(const double &s)
+    {
+        x *= s;
+        y *= s;
+        return *this;
+    };
+    Vec2 operator*(double &s) { return *this *= s; }
+    Vec2 &operator/=(const double &s)
+    {
+        x /= s;
+        y /= s;
+        return *this;
+    };
+    Vec2 operator/(double &s) { return *this /= s; }
+
+    //extra operators
+    Vec2 squared() {return *this * *this;}
+    Vec2 cubed() {return this->squared() * *this;}
+
+    //comparator
+    bool operator==(Vec2 &other) {return this->y == other.y && this->x == other.x;}
+
+
+    //normal methods
+    double get_x() {return x;}
+    double get_y() {return y;}
+    double get_value() {return x + y;}
 
     // calculate distance to point source (0.0 ,0.0)
     double distance_from_source() // root(x^2 + y^2)
     {
-        return std::sqrt(x * x + y * y);
+        return std::sqrt((this->squared()).get_value());
     }
 
     // Calculate distance between two Vec2 (positions)
@@ -109,6 +194,9 @@ struct Vec2
     {
         return (*this - other).distance_from_source();
     }
+
+    // function to measure directional similarity between two vectors
+    double dot_product( Vec2 &v) {return (*this * v).get_value(); } // x1*x2 + y1*y2
 
     // returns a vector with the same direction as the original, but with length 1.
     Vec2 normalize()
@@ -150,29 +238,6 @@ struct Vec2
         return angle;
     }
 
-    // Operator overloading
-    Vec2 operator+(const Vec2 &v) const { return {y + v.y, x + v.x}; };
-    Vec2 operator-(const Vec2 &v) const { return {y - v.y, x - v.x}; };
-    Vec2 operator*(double s) const { return {y * s, x * s}; };
-    Vec2 operator/(double s) const { return {y / s, x / s}; };
-    Vec2 &operator+=(const Vec2 &v)
-    {
-        x += v.x;
-        y += v.y;
-        return *this;
-    };
-    Vec2 &operator-=(const Vec2 &v)
-    {
-        x -= v.x;
-        y -= v.y;
-        return *this;
-    };
-    Vec2 &operator*=(double s)
-    {
-        x *= s;
-        y *= s;
-        return *this;
-    };
 };
 
 bool cmp_distance(Vec2 vector1, Vec2 vector2, Operator opp) { return cmp(vector1.distance_from_source(), vector2.distance_from_source(), opp); }
@@ -183,21 +248,25 @@ bool cmp_value(Vec2 vector1, Vec2 vector2, Operator opp, Orientation orientation
 
 struct Dynamics
 {
+    ~Dynamics() = default; //destructor
+    Dynamics(Dynamics &other) = default; //copy
+    Dynamics(Dynamics &&other) = default; //move
+    
     // Data needed for dynamics
-    double m_mass{};
-    Figure figure{};
+    double m_mass{0};
+    Figure figure{Figure::None};
 
     // Linear movement
-    Vec2 m_position{};
-    Vec2 m_velocity{};
-    Vec2 m_acceleration{};
-    Vec2 m_force{};
+    Vec2 m_position{0,0};
+    Vec2 m_velocity{0,0};
+    Vec2 m_acceleration{0,0};
+    Vec2 m_force{0,0};
 
     // Rotating
-    double m_angle{};
-    double m_inertia{};
-    double m_angvelocity{};
-    double m_torque{};
+    double m_angle{0};
+    double m_inertia{0};
+    double m_angvelocity{0};
+    double m_torque{0};
 };
 
 // Superclass Shape
@@ -221,10 +290,10 @@ public:
     // Getters
     double getMass() const { return m_state.m_mass; }
     Figure getFigure() const { return m_state.figure; }
-    Vec2 getPos() const { return m_state.m_position; }
-    Vec2 getVel() const { return m_state.m_velocity; }
-    Vec2 getAcc() const { return m_state.m_acceleration; }
-    Vec2 getForce() const { return m_state.m_force; }
+    Vec2 getPos() const { return Vec2{m_state.m_position.y, m_state.m_position.x}; }
+    Vec2 getVel() const { return Vec2{m_state.m_velocity.y, m_state.m_velocity.x}; }
+    Vec2 getAcc() const { return Vec2{m_state.m_acceleration.y, m_state.m_acceleration.x}; }
+    Vec2 getForce() const { return Vec2{m_state.m_force.y, m_state.m_force.x}; }
     double getAngle() const { return m_state.m_angle; }
     double getInertia() const { return m_state.m_inertia; }
     double getAngVel() const { return m_state.m_angvelocity; }
@@ -239,29 +308,15 @@ private:
 // function to use between shape-objects
 bool collides(const Shape &shape_A, const Shape &shape_B) // Collision checker for all shapes
 {
-    Vec2 AB = shape_B.getPos() - shape_A.getPos();
-    double AB_len = AB.distance_from_source();
-    if (AB_len == 0.0)
-    {
-        return true;
-    }
-    double AB_angle = AB.angle();
-    double PI = std::acos(-1);
+    Vec2 AB{shape_B.getPos() - shape_A.getPos()}; //we create the vector between the 2 middle-points of the shapes
+    double AB_len = AB.distance_from_source(); //now we take the length of that vector
+    if (AB_len == 0.0) {return true;}
+    double AB_angle {AB.angle()};
+    double PI {std::acos(-1)};
     double BA_angle;
-    if (AB_angle <= PI)
-    {
-        BA_angle = AB_angle + PI;
-    }
-    else
-    {
-        BA_angle = AB_angle - PI;
-    }
-    double len_A = shape_A.get_distance_MiddleToSide(normalize_angle(AB_angle - shape_A.getAngle()));
-    double len_B = shape_B.get_distance_MiddleToSide(normalize_angle(BA_angle - shape_B.getAngle()));
-    if (len_A + len_B < AB_len)
-    {
-        return false;
-    }
+    if (AB_angle <= PI) {BA_angle = AB_angle + PI;}
+    else {BA_angle = AB_angle - PI;}
+    if (shape_A.get_distance_MiddleToSide(normalize_angle(AB_angle - shape_A.getAngle())) + shape_B.get_distance_MiddleToSide(normalize_angle(BA_angle - shape_B.getAngle())) < AB_len) {return false;}
     return true;
 }
 
@@ -384,5 +439,5 @@ public:
     double getArea() const { return dimensions.y * dimensions.x; } // area = base * height
 
 private:
-    Vec2 dimensions{};
+    Vec2 dimensions{0,0};
 };
